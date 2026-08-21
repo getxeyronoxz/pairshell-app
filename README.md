@@ -62,7 +62,7 @@ pairshell start
 
 ### 3. Pair with Android
 
-Open the PairShell Android app, tap **Add workspace**, and scan the QR code displayed in your terminal.
+Open the PairShell Android app, tap **Add workspace**, and scan the QR code displayed in your terminal, or copy and paste the displayed pairing link.
 
 ---
 
@@ -105,17 +105,11 @@ pairshell reload --tunnel tailscale
 
 ---
 
-## Ecosystem Repositories
-
-- **Main Monorepo**: [getxeyronoxz/pairshell](https://github.com/getxeyronoxz/pairshell) (Private monorepo)
-- **Public Distribution & Releases**: [getxeyronoxz/pairshell-app](https://github.com/getxeyronoxz/pairshell-app) (Public distribution repo)
-- **Documentation Website**: [getxeyronoxz/pairshell-web](https://github.com/getxeyronoxz/pairshell-web) ([https://pairshell.vercel.app](https://pairshell.vercel.app))
-
----
-
 ## License & Support
 
 Developed and maintained by **Xeyronox** ([@xeyronox](https://instagram.com/xeyronox)).  
+Official Distribution: [https://github.com/getxeyronoxz/pairshell-app](https://github.com/getxeyronoxz/pairshell-app)  
+Website: [https://pairshell.vercel.app](https://pairshell.vercel.app)  
 Email: [xeyronox@outlook.com](mailto:xeyronox@outlook.com)  
 
 Copyright © 2026 Xeyronox. All rights reserved.
