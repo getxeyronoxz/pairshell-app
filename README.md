@@ -1,67 +1,121 @@
 # PairShell
 
-> **Android remote terminal for host-side coding agents and CLI workflows.**
+<div align="center">
 
-Official Website: [https://pairshell.vercel.app](https://pairshell.vercel.app)  
-NPM Package: [pairshell-cli](https://www.npmjs.com/package/pairshell-cli)  
-Developer: **Xeyronox** ([@xeyronox](https://instagram.com/xeyronox))
+**The Agentic Coding Environment (ACE) in your pocket.**
+
+[![Official Website](https://img.shields.io/badge/website-pairshell.vercel.app-39e59a?style=flat-square)](https://pairshell.vercel.app)
+[![Host CLI](https://img.shields.io/npm/v/pairshell-cli?label=pairshell-cli&color=39e59a&style=flat-square)](https://www.npmjs.com/package/pairshell-cli)
+[![Target Android](https://img.shields.io/badge/Android-11%20to%2016%20(API%2030--36)-black?style=flat-square&logo=android)](https://pairshell.vercel.app/download)
+[![Developer](https://img.shields.io/badge/developer-Xeyronox-39e59a?style=flat-square)](https://instagram.com/xeyronox)
+[![License](https://img.shields.io/badge/license-Proprietary-blue?style=flat-square)](LICENSE)
+
+</div>
 
 ---
 
-## 1. Overview
+## What is PairShell?
 
-**PairShell** connects your Android phone directly to a real pseudo-terminal (PTY) running on your computer, workstation, or remote VPS. Your repository, development tools, environment variables, credentials, and coding agents (such as Codex CLI or OpenCode) remain entirely on your host machine.
+**PairShell** is a low-latency Android remote terminal designed for controlling coding agents (such as Codex CLI and OpenCode) and host-installed development CLI workflows directly from your Android phone or tablet.
 
-The Android app acts as a low-latency, high-fidelity control surface, streaming ANSI TrueColor output and sending interactive keyboard input with full modifier support (Ctrl, Alt, Tab, Esc, Arrow keys).
+The real pseudo-terminal (PTY) runs on your computer, workstation, or remote VPS. Pair effortlessly via QR code and connect over a user-selected TLS WebSocket tunnel with **zero inbound open ports**.
 
-## 2. Key Architecture & Invariants
+`
+┌─────────────────┐       Outbound TLS WebSocket       ┌──────────────────────┐       Local PTY Engine       ┌─────────────────────┐
+│  Android Client │ <────────────────────────────────> │ Relay / TLS Tunnel   │ <──────────────────────────> │ PairShell Host CLI  │
+│  (Flutter App)  │    (Cloudflare / ngrok / Tailscale)│ (Zero Inbound Ports) │     (PowerShell 7 / Unix)    │ (Desktop / VPS PTY) │
+└─────────────────┘                                    └──────────────────────┘                              └─────────────────────┘
+`
 
-1. **Local-First Pseudo-Terminal**: Commands and tools run natively on your machine inside a real PTY. Windows uses verified PowerShell 7.6.4+ Core ConPTY; macOS and Linux use native POSIX login shells.
-2. **Cryptographic Single-Use Pairing**: Pairing QR codes contain a high-entropy HMAC challenge that expires in 60 seconds. Constant-time comparisons protect against timing attacks.
-3. **Strict Privacy Invariant**: Zero terminal content, commands, filesystem paths, or credentials are ever recorded in telemetry or remote storage.
-4. **Hashed Bearer Credentials**: Paired Android devices receive revocable bearer tokens stored in Android EncryptedSharedPreferences / KeyStore, with SHA-256 hashes preserved host-side.
-5. **Foreground Service Connection**: Android utilizes a dedicated foreground service to maintain session continuity during network transitions and prevent background termination.
-6. **Zero Inbound Open Ports**: Default outbound-only Cloudflare Quick Tunnels require no port forwarding, public IP, or account setup.
+---
 
-## 3. Quick Start (Host)
+## Key Highlights
 
-Install the host CLI globally via npm:
+- **Native Host Fidelity**: Real interactive PTY input/output with ANSI 24-bit TrueColor rendering on your Android device.
+- **Single-Use Cryptographic Pairing**: High-entropy HMAC-SHA256 challenge pairing with 60-second automatic token expiration and timing-safe verification.
+- **Zero Inbound Ports**: Default outbound-only Cloudflare Quick Tunnel auto-provisions on first run. Also supports ngrok, Tailscale Funnel, and Microsoft Dev Tunnels.
+- **Hardware & Keyboard Support**: Full accessory row with modifier keys (Ctrl, Alt, Esc, Tab, directional arrows) and predictive back navigation.
+- **Persistent Reconnection**: Android Kotlin foreground service maintains session continuity across network handoffs and device sleep.
+- **Strict Privacy Invariant**: Zero terminal output, commands, repository paths, or private credentials are ever logged or exported to telemetry.
+
+---
+
+## Quick Start (Host Setup)
+
+### 1. Install the CLI Globally
+
+Install the official host CLI via npm:
 
 `ash
 npm install --global pairshell-cli
 `
 
-Start the host daemon and display a pairing QR:
+### 2. Start the Host Daemon
+
+Spawn the background daemon, open an encrypted tunnel, and display your pairing QR:
 
 `ash
 pairshell start
 `
 
-Scan the QR code from the PairShell Android app to pair immediately.
+*Cloudflare tunnel dependencies auto-install and verify cryptographically on first run.*
 
-### Available CLI Commands
+### 3. Pair with Android
 
-| Command | Purpose |
-| :--- | :--- |
-| pairshell start | Spawn local host daemon, attach PTY, open tunnel, and print pairing QR |
-| pairshell stop | Gracefully terminate daemon, terminals, and tunnel processes |
-| pairshell status | Show host PID, uptime, tunnel provider health, and authenticated devices |
-| pairshell qr | Rotate pairing token and print a fresh 60s HMAC challenge QR |
-| pairshell reload | Hot-swap tunnel provider or shell preference without dropping session |
-| pairshell doctor | Preflight audit of ConPTY, PowerShell runtime, Unix shells, and network |
+Open the PairShell Android app, tap **Add workspace**, and scan the QR code displayed in your terminal.
 
-## 4. Supported Tunnel Providers
+---
 
-- **Cloudflare Quick Tunnel** (Default): Account-free, zero-config, outbound-only tunnel. The official platform binary is lazily cached and cryptographically verified before execution.
-- **ngrok**: Native agent relay with your personal authtoken (--tunnel ngrok).
-- **Tailscale Funnel**: Secure tailnet endpoint relay (--tunnel tailscale).
-- **Microsoft Dev Tunnels**: Azure-authenticated developer tunnel (--tunnel devtunnel).
+## CLI Command Matrix
 
-## 5. Security & Vulnerability Reporting
+| Command | Category | Description |
+| :--- | :--- | :--- |
+| pairshell start | Lifecycle | Start background host daemon, attach PTY, open tunnel, and print pairing QR |
+| pairshell stop | Lifecycle | Gracefully terminate daemon, pseudo-terminals, and child tunnel processes |
+| pairshell status | Diagnostics | Show host PID, uptime, tunnel provider health, and authenticated device state |
+| pairshell qr | Security | Rotate pairing secret and print a fresh 60s single-use HMAC challenge QR |
+| pairshell reload | Config | Hot-swap tunnel provider or shell preference on the fly without dropping session |
+| pairshell doctor | Preflight | Audit system runtime: ConPTY, PowerShell 7.6.4+ Core, Unix shells, and network |
 
-Security is a primary design goal. If you discover a potential vulnerability, please email xeyronox@outlook.com with reproducible details. Never include live session tokens or sensitive infrastructure credentials in public bug reports.
+---
 
-## 6. License
+## Supported Tunnel Providers
 
-Copyright © 2026 Xeyronox. All rights reserved.  
-Proprietary pre-release developer software.
+PairShell lets you bring your own route:
+
+1. **Cloudflare Quick Tunnel** (--tunnel cloudflare, default): Zero-config, account-free, outbound-only tunnel.
+2. **ngrok** (--tunnel ngrok): Native agent relay with your personal authtoken.
+3. **Tailscale Funnel** (--tunnel tailscale): Secure tailnet endpoint relay.
+4. **Microsoft Dev Tunnels** (--tunnel devtunnel): Azure-authenticated developer tunnel.
+
+Switch providers anytime:
+
+`ash
+pairshell reload --tunnel tailscale
+`
+
+---
+
+## Security Invariants
+
+- **Host Isolation**: Repository files, environment variables, and PTY processes stay 100% local on your host computer.
+- **Timing-Safe HMAC**: Pairing tokens use constant-time comparisons to eliminate timing side-channel attacks.
+- **Hashed Device Tokens**: Only salted SHA-256 hashes of authorized Android device tokens are stored host-side.
+- **Zero Logging Policy**: Strict architectural invariant prohibiting the recording or exporting of terminal content.
+
+---
+
+## Ecosystem Repositories
+
+- **Main Monorepo**: [getxeyronoxz/pairshell](https://github.com/getxeyronoxz/pairshell) (Private monorepo)
+- **Public Distribution & Releases**: [getxeyronoxz/pairshell-app](https://github.com/getxeyronoxz/pairshell-app) (Public distribution repo)
+- **Documentation Website**: [getxeyronoxz/pairshell-web](https://github.com/getxeyronoxz/pairshell-web) ([https://pairshell.vercel.app](https://pairshell.vercel.app))
+
+---
+
+## License & Support
+
+Developed and maintained by **Xeyronox** ([@xeyronox](https://instagram.com/xeyronox)).  
+Email: [xeyronox@outlook.com](mailto:xeyronox@outlook.com)  
+
+Copyright © 2026 Xeyronox. All rights reserved.
